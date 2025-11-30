@@ -22,16 +22,14 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
-        run: |
-          # we are using the -e flag, so that code cov finds the source.
-          # this is not ideal, since installing an editable can technically
-          # differ from a normal install in surprising ways.
-          pip install -e '.[all]'
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+      - name: Setup UV_PYTHON
+        run: echo "UV_PYTHON=${{ matrix.python-version }}" >> $GITHUB_ENV
+      - name: Install the project
+        run: uv sync --locked --all-extras --dev
       - name: Test with pytest
-        run: |
-          pip install pytest pytest-cov
-          pytest --cov=pkglite --cov-report=xml
+        run: uv run pytest tests --cov=pkglite --cov-report=xml
 
       # - name: Upload coverage reports to Codecov
       #   uses: codecov/codecov-action@v4
@@ -46,11 +44,12 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: "3.14"
-      - name: Install dependencies
-        run: |
-          pip install -e '.[all]'
+          python-version-file: '.python-version'
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+      - name: Setup UV_PYTHON
+        run: echo "UV_PYTHON=${{ matrix.python-version }}" >> $GITHUB_ENV
+      - name: Install the project
+        run: uv sync --locked --all-extras --dev
       - name: Test with pytest
-        run: |
-          pip install pytest pytest-cov
-          pytest --cov=pkglite --cov-report=xml
+        run: uv run pytest tests --cov=pkglite --cov-report=xml
